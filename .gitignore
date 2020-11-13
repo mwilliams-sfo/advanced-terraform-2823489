@@ -1,4 +1,5 @@
 *.terraform
+*.exe
 *.pem
 *.tfvars
 *.tfplan
