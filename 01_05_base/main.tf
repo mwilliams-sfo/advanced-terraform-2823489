@@ -1,9 +1,7 @@
 # //////////////////////////////
 # VARIABLES
 # //////////////////////////////
-variable "aws_access_key" {}
-
-variable "aws_secret_key" {}
+variable "aws_profile" {}
 
 variable "ssh_key_name" {}
 
@@ -25,9 +23,8 @@ variable "subnet1_cidr" {
 # PROVIDERS
 # //////////////////////////////
 provider "aws" {
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
-  region     = var.region
+  profile = var.aws_profile
+  region = var.region
 }
 
 # //////////////////////////////
@@ -93,7 +90,7 @@ resource "aws_security_group" "sg-nodejs-instance" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   egress {
     from_port = 0
     to_port = 0

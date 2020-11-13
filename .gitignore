@@ -1,7 +1,6 @@
 *.terraform
 *.exe
 *.pem
-*.tfvars
 *.tfplan
 *.tfstate
 *.tfstate.backup
