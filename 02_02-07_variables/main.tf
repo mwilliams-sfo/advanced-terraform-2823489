@@ -1,12 +1,14 @@
 # //////////////////////////////
 # VARIABLES
 # //////////////////////////////
-variable "aws_access_key" {}
-
-variable "aws_secret_key" {}
+variable "aws_profile" {}
 
 variable "region" {
   default = "us-east-2"
+}
+
+variable "deploy_environment" {
+  default = "DEV"
 }
 
 variable "vpc_cidr" {
@@ -46,19 +48,19 @@ variable "environment_instance_settings" {
   type = map(object({instance_type=string, monitoring=bool}))
   default = {
     "DEV" = {
-      instance_type = "t2.micro", 
+      instance_type = "t2.micro",
       monitoring = false
     },
    "QA" = {
-      instance_type = "t2.micro", 
+      instance_type = "t2.micro",
       monitoring = false
     },
     "STAGE" = {
-      instance_type = "t2.micro", 
+      instance_type = "t2.micro",
       monitoring = false
     },
     "PROD" = {
-      instance_type = "t2.micro", 
+      instance_type = "t2.micro",
       monitoring = true
     }
   }
@@ -68,9 +70,8 @@ variable "environment_instance_settings" {
 # PROVIDERS
 # //////////////////////////////
 provider "aws" {
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
-  region     = var.region
+  profile = var.aws_profile
+  region  = var.region
 }
 
 # //////////////////////////////
@@ -129,7 +130,7 @@ resource "aws_security_group" "sg-nodejs-instance" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   egress {
     from_port = 0
     to_port = 0
@@ -141,14 +142,13 @@ resource "aws_security_group" "sg-nodejs-instance" {
 # INSTANCE
 resource "aws_instance" "nodejs1" {
   ami = data.aws_ami.aws-linux.id
-  instance_type = var.environment_instance_type["DEV"]
-  //instance_type = var.environment_instance_settings["PROD"].instance_type
+  instance_type = var.environment_instance_settings[var.deploy_environment].instance_type
   subnet_id = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.sg-nodejs-instance.id]
 
-  monitoring = var.environment_instance_settings["PROD"].monitoring
+  monitoring = var.environment_instance_settings[var.deploy_environment].monitoring
 
-  tags = {Environment = var.environment_list[0]}
+  tags = {Environment = var.environment_map[var.deploy_environment]}
 
 }
 
@@ -182,4 +182,8 @@ data "aws_ami" "aws-linux" {
 # //////////////////////////////
 output "instance-dns" {
   value = aws_instance.nodejs1.public_dns
+}
+
+output "private-dns" {
+  value = aws_instance.nodejs1.private_dns
 }
